@@ -8,40 +8,80 @@ services:
     buildCommand: pip install uv && uv pip install --system -r pyproject.toml
     startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
     envVars:
+      # ── App ─────────────────────────────────────────────────
       - key: FLASK_ENV
         value: production
+      - key: APP_NAME
+        value: DocChat
       - key: SECRET_KEY
         generateValue: true
       - key: JWT_SECRET_KEY
         generateValue: true
+      - key: JWT_ACCESS_MINUTES
+        value: "60"
+
+      # ── Database ─────────────────────────────────────────────
       - key: DATABASE_URL
-        sync: false
-      - key: OPENROUTER_API_KEY
-        sync: false
-      - key: LLM_MODEL
-        value: nvidia/nemotron-3.5-lightning:free
-      - key: LLM_FALLBACK_MODELS
-        value: nvidia/nemotron-3-ultra-550b-a55b:free,dots-studio/dots-3-note-preview:free,google/gemma-4-31b-it:free
-      - key: LLM_MAX_TOKENS
-        value: "3000"
-      - key: LLM_TIMEOUT_SECONDS
-        value: "120"
-      - key: EMBEDDING_MODEL
-        value: sentence-transformers/all-MiniLM-L6-v2
+        sync: false          # set manually in Render dashboard
+      - key: TEST_DATABASE_URL
+        value: sqlite:///:memory:
+
+      # ── File storage (ephemeral /tmp on free tier) ───────────
       - key: UPLOAD_DIR
         value: /tmp/uploads
       - key: CHROMA_DIR
         value: /tmp/chroma
       - key: MAX_UPLOAD_MB
         value: "20"
+      - key: ALLOWED_EXTENSIONS
+        value: pdf,txt,md
+
+      # ── Embeddings & chunking ────────────────────────────────
+      - key: EMBEDDING_MODEL
+        value: sentence-transformers/all-MiniLM-L6-v2
+      - key: CHUNK_SIZE
+        value: "800"
+      - key: CHUNK_OVERLAP
+        value: "150"
+
+      # ── Retrieval ────────────────────────────────────────────
       - key: TOP_K
         value: "8"
       - key: MAX_DISTANCE
         value: "0.85"
-      - key: FRONTEND_ORIGIN
-        sync: false
+      - key: HISTORY_TURNS
+        value: "6"
+
+      # ── OpenRouter / LLM ─────────────────────────────────────
+      - key: OPENROUTER_API_KEY
+        sync: false          # set manually in Render dashboard
+      - key: OPENROUTER_BASE_URL
+        value: https://openrouter.ai/api/v1
+      - key: LLM_MODEL
+        value: nvidia/nemotron-3.5-lightning:free
+      - key: LLM_FALLBACK_MODELS
+        value: nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free,dots-studio/dots-3-note-preview:free,google/gemma-4-31b-it:free
+      - key: LLM_MAX_TOKENS
+        value: "3000"
+      - key: LLM_TEMPERATURE
+        value: "0.2"
+      - key: LLM_TIMEOUT_SECONDS
+        value: "120"
+      - key: LLM_MAX_RETRIES
+        value: "3"
+      - key: LLM_GLOBAL_RPM
+        value: "18"
+      - key: LLM_DAILY_SOFT_LIMIT
+        value: "45"
       - key: ALLOW_PAID_MODELS
         value: "false"
+
+      # ── CORS ─────────────────────────────────────────────────
+      - key: FRONTEND_ORIGIN
+        sync: false          # set to your Vercel URL after deploying frontend
+
+      # ── Runtime ──────────────────────────────────────────────
       - key: PYTHON_VERSION
         value: "3.13.0"
+
     healthCheckPath: /api/health
