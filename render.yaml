@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: docchat-backend
+    runtime: python
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: pip install uv && uv pip install --system -r pyproject.toml
+    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: nvidia/nemotron-3.5-lightning:free
+      - key: LLM_FALLBACK_MODELS
+        value: nvidia/nemotron-3-ultra-550b-a55b:free,dots-studio/dots-3-note-preview:free,google/gemma-4-31b-it:free
+      - key: LLM_MAX_TOKENS
+        value: "3000"
+      - key: LLM_TIMEOUT_SECONDS
+        value: "120"
+      - key: EMBEDDING_MODEL
+        value: sentence-transformers/all-MiniLM-L6-v2
+      - key: UPLOAD_DIR
+        value: /tmp/uploads
+      - key: CHROMA_DIR
+        value: /tmp/chroma
+      - key: MAX_UPLOAD_MB
+        value: "20"
+      - key: TOP_K
+        value: "8"
+      - key: MAX_DISTANCE
+        value: "0.85"
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: ALLOW_PAID_MODELS
+        value: "false"
+      - key: PYTHON_VERSION
+        value: "3.13.0"
+    healthCheckPath: /api/health
