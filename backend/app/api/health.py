@@ -25,12 +25,12 @@ def health_check():
         store = VectorStore(persist_dir=chroma_dir)
         store.count()
     except Exception as exc:
-        vector_status = f"error: {str(exc)}"
+        vector_status = f"warning: {str(exc)}"
     finally:
         if store is not None:
             store.close()
 
-    is_ok = db_status == "ok" and vector_status == "ok"
+    is_ok = db_status == "ok"
     status_str = "ok" if is_ok else "unhealthy"
     status_code = 200 if is_ok else 503
 
