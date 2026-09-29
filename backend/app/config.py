@@ -75,6 +75,11 @@ class Config:
         app.config["JWT_ACCESS_TOKEN_EXPIRES"] = s.JWT_ACCESS_MINUTES * 60
         app.config["SQLALCHEMY_DATABASE_URI"] = s.DATABASE_URL
         app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+            "pool_pre_ping": True,
+            "pool_recycle": 280,
+            "pool_timeout": 30,
+        }
         app.config["MAX_CONTENT_LENGTH"] = s.max_content_length
         app.config["UPLOAD_DIR"] = s.UPLOAD_DIR
         app.config["CHROMA_DIR"] = s.CHROMA_DIR
