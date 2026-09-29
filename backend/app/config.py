@@ -38,8 +38,8 @@ class Settings(BaseSettings):
 
     OPENROUTER_API_KEY: str = ""
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
-    LLM_MODEL: str = "meta-llama/llama-3.3-70b-instruct:free"
-    LLM_FALLBACK_MODELS: str = "google/gemma-2-9b-it:free,mistralai/mistral-small-24b-instruct-2501:free,google/gemma-4-31b-it:free,qwen/qwen-2.5-72b-instruct:free"
+    LLM_MODEL: str = "openrouter/free"
+    LLM_FALLBACK_MODELS: str = "poolside/laguna-s-2.1:free,poolside/laguna-xs-2.1:free,google/gemma-4-31b-it:free,qwen/qwen3.8-27b:free"
     LLM_MAX_TOKENS: int = 1000
     LLM_TEMPERATURE: float = 0.2
     LLM_TIMEOUT_SECONDS: int = 30
