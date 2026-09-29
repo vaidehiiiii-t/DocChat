@@ -1,11 +1,14 @@
-from typing import Optional
+from __future__ import annotations
 
-from sentence_transformers import SentenceTransformer
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from sentence_transformers import SentenceTransformer
 
 
 class EmbeddingService:
     _instance: Optional["EmbeddingService"] = None
-    _model: Optional[SentenceTransformer] = None
+    _model: Optional["SentenceTransformer"] = None
 
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
         self.model_name = model_name
@@ -19,8 +22,11 @@ class EmbeddingService:
         return cls._instance
 
     @property
-    def model(self) -> SentenceTransformer:
+    def model(self) -> "SentenceTransformer":
         if self._model is None:
+            # Lazy import: torch/sentence_transformers load only on first
+            # embedding request, NOT at Flask startup. Fixes OOM on free tier.
+            from sentence_transformers import SentenceTransformer  # noqa: PLC0415
             self._model = SentenceTransformer(self.model_name)
         return self._model
 
@@ -35,3 +41,4 @@ class EmbeddingService:
             normalize_embeddings=True,
         )
         return embeddings.tolist()
+

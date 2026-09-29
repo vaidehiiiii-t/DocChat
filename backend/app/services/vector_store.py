@@ -1,11 +1,13 @@
 from typing import Any, Optional
 
-import chromadb
-from chromadb.config import Settings as ChromaSettings
-
 
 class VectorStore:
     def __init__(self, persist_dir: str = "./storage/chroma", collection_name: str = "doc_chunks"):
+        # Lazy import: chromadb + onnxruntime only load when VectorStore is
+        # instantiated (first upload/query), NOT at Flask startup.
+        import chromadb  # noqa: PLC0415
+        from chromadb.config import Settings as ChromaSettings  # noqa: PLC0415
+
         self.persist_dir = persist_dir
         self.collection_name = collection_name
         self.client = chromadb.PersistentClient(
