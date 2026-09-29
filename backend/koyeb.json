@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.koyeb.com/v1/app.json",
+  "name": "docchat-backend",
+  "services": [
+    {
+      "name": "api",
+      "type": "web",
+      "git": {
+        "branch": "main",
+        "workdir": "/backend"
+      },
+      "build": {
+        "buildpack": "python",
+        "build_command": "pip install -r requirements.txt"
+      },
+      "run": {
+        "command": "gunicorn wsgi:app --bind 0.0.0.0:8000 --workers 1 --timeout 120"
+      },
+      "ports": [
+        { "port": 8000, "protocol": "http" }
+      ],
+      "health_checks": [
+        { "path": "/api/health", "port": 8000, "protocol": "http" }
+      ]
+    }
+  ]
+}
