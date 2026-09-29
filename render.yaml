@@ -1,14 +1,12 @@
 services:
   - type: web
     name: docchat-backend
-    runtime: python
+    runtime: docker
     region: singapore
     plan: free
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    dockerfilePath: ./Dockerfile
     envVars:
-      # ── App ─────────────────────────────────────────────────
       - key: FLASK_ENV
         value: production
       - key: APP_NAME
@@ -19,14 +17,10 @@ services:
         generateValue: true
       - key: JWT_ACCESS_MINUTES
         value: "60"
-
-      # ── Database ─────────────────────────────────────────────
       - key: DATABASE_URL
-        sync: false          # set manually in Render dashboard
+        sync: false
       - key: TEST_DATABASE_URL
         value: sqlite:///:memory:
-
-      # ── File storage (ephemeral /tmp on free tier) ───────────
       - key: UPLOAD_DIR
         value: /tmp/uploads
       - key: CHROMA_DIR
@@ -35,26 +29,20 @@ services:
         value: "20"
       - key: ALLOWED_EXTENSIONS
         value: pdf,txt,md
-
-      # ── Embeddings & chunking ────────────────────────────────
       - key: EMBEDDING_MODEL
         value: sentence-transformers/all-MiniLM-L6-v2
       - key: CHUNK_SIZE
         value: "800"
       - key: CHUNK_OVERLAP
         value: "150"
-
-      # ── Retrieval ────────────────────────────────────────────
       - key: TOP_K
         value: "8"
       - key: MAX_DISTANCE
         value: "0.85"
       - key: HISTORY_TURNS
         value: "6"
-
-      # ── OpenRouter / LLM ─────────────────────────────────────
       - key: OPENROUTER_API_KEY
-        sync: false          # set manually in Render dashboard
+        sync: false
       - key: OPENROUTER_BASE_URL
         value: https://openrouter.ai/api/v1
       - key: LLM_MODEL
@@ -75,13 +63,6 @@ services:
         value: "45"
       - key: ALLOW_PAID_MODELS
         value: "false"
-
-      # ── CORS ─────────────────────────────────────────────────
       - key: FRONTEND_ORIGIN
-        sync: false          # set to your Vercel URL after deploying frontend
-
-      # ── Runtime ──────────────────────────────────────────────
-      - key: PYTHON_VERSION
-        value: "3.13.0"
-
+        sync: false
     healthCheckPath: /api/health
