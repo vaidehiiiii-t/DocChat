@@ -25,6 +25,12 @@ services:
         value: /tmp/uploads
       - key: CHROMA_DIR
         value: /tmp/chroma
+      - key: CHROMA_API_KEY
+        value: ck-2ussJ7k1CqZaSK8yVAeonsmrBeby3MuRvRZqWVfMQSqT
+      - key: CHROMA_TENANT
+        value: 5b10a8df-0f42-49e8-84f6-134be05397f1
+      - key: CHROMA_DATABASE
+        value: Docchat
       - key: MAX_UPLOAD_MB
         value: "20"
       - key: ALLOWED_EXTENSIONS

@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     MAX_UPLOAD_MB: int = 20
     ALLOWED_EXTENSIONS: str = "pdf,txt,md"
 
+    CHROMA_API_KEY: str = ""
+    CHROMA_TENANT: str = ""
+    CHROMA_DATABASE: str = "Docchat"
+
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
     CHUNK_SIZE: int = 800
     CHUNK_OVERLAP: int = 150
@@ -74,6 +78,9 @@ class Config:
         app.config["MAX_CONTENT_LENGTH"] = s.max_content_length
         app.config["UPLOAD_DIR"] = s.UPLOAD_DIR
         app.config["CHROMA_DIR"] = s.CHROMA_DIR
+        app.config["CHROMA_API_KEY"] = s.CHROMA_API_KEY
+        app.config["CHROMA_TENANT"] = s.CHROMA_TENANT
+        app.config["CHROMA_DATABASE"] = s.CHROMA_DATABASE
         app.config["FRONTEND_ORIGIN"] = s.FRONTEND_ORIGIN
         app.config["DOCCHAT_SETTINGS"] = s
 

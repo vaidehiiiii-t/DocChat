@@ -2,18 +2,53 @@ from typing import Any, Optional
 
 
 class VectorStore:
-    def __init__(self, persist_dir: str = "./storage/chroma", collection_name: str = "doc_chunks"):
-        # Lazy import: chromadb + onnxruntime only load when VectorStore is
-        # instantiated (first upload/query), NOT at Flask startup.
+    def __init__(
+        self,
+        persist_dir: str = "./storage/chroma",
+        collection_name: str = "doc_chunks",
+        api_key: Optional[str] = None,
+        tenant: Optional[str] = None,
+        database: Optional[str] = None,
+    ):
+        import os
         import chromadb  # noqa: PLC0415
         from chromadb.config import Settings as ChromaSettings  # noqa: PLC0415
+        from flask import current_app  # noqa: PLC0415
 
         self.persist_dir = persist_dir
         self.collection_name = collection_name
-        self.client = chromadb.PersistentClient(
-            path=persist_dir,
-            settings=ChromaSettings(anonymized_telemetry=False),
-        )
+
+        resolved_api_key = api_key
+        resolved_tenant = tenant
+        resolved_database = database
+
+        if current_app:
+            settings = current_app.config.get("DOCCHAT_SETTINGS")
+            if settings:
+                resolved_api_key = resolved_api_key or getattr(settings, "CHROMA_API_KEY", "")
+                resolved_tenant = resolved_tenant or getattr(settings, "CHROMA_TENANT", "")
+                resolved_database = resolved_database or getattr(settings, "CHROMA_DATABASE", "")
+            else:
+                resolved_api_key = resolved_api_key or current_app.config.get("CHROMA_API_KEY", "")
+                resolved_tenant = resolved_tenant or current_app.config.get("CHROMA_TENANT", "")
+                resolved_database = resolved_database or current_app.config.get("CHROMA_DATABASE", "")
+
+        resolved_api_key = (resolved_api_key or os.environ.get("CHROMA_API_KEY", "")).strip()
+        resolved_tenant = (resolved_tenant or os.environ.get("CHROMA_TENANT", "")).strip()
+        resolved_database = (resolved_database or os.environ.get("CHROMA_DATABASE", "Docchat")).strip()
+
+        if resolved_api_key and resolved_tenant:
+            self.client = chromadb.CloudClient(
+                api_key=resolved_api_key,
+                tenant=resolved_tenant,
+                database=resolved_database or "Docchat",
+            )
+        else:
+            self.client = chromadb.PersistentClient(
+                path=persist_dir,
+                settings=ChromaSettings(anonymized_telemetry=False),
+            )
+
         self.collection = self.client.get_or_create_collection(
             name=collection_name,
             metadata={"hnsw:space": "cosine"},
