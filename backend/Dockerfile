@@ -20,4 +20,4 @@ RUN mkdir -p /tmp/uploads /tmp/chroma
 
 EXPOSE 10000
 
-CMD ["gunicorn", "wsgi:app", "--bind", "0.0.0.0:10000", "--workers", "1", "--timeout", "120", "--log-level", "info"]
+CMD ["gunicorn", "wsgi:app", "--bind", "0.0.0.0:10000", "--workers", "1", "--timeout", "180", "--log-level", "info"]

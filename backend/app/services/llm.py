@@ -309,26 +309,49 @@ class LLMService:
                     )
                     self.last_stream_model = model
 
-                    # Collect all tokens first, then strip reasoning, then yield.
-                    # This is necessary because thinking-model preambles (e.g. nemotron's
-                    # "Here's a thinking process:") span many paragraphs — we can't detect
-                    # where the real answer starts until we have the full response.
-                    raw_tokens: list[str] = []
+                    in_think = False
+                    buffer = ""
+                    yielded_any = False
+
                     for chunk in response_stream:
                         delta = chunk.choices[0].delta if chunk.choices else None
                         content = getattr(delta, "content", None) or ""
-                        if content:
-                            raw_tokens.append(content)
+                        if not content:
+                            continue
 
-                    full_raw = "".join(raw_tokens)
-                    clean_answer = self.strip_reasoning_tokens(full_raw)
+                        buffer += content
 
-                    if clean_answer:
-                        # Yield in small chunks for a natural streaming appearance
-                        chunk_size = 8
-                        for i in range(0, len(clean_answer), chunk_size):
-                            yield clean_answer[i : i + chunk_size]
+                        while buffer:
+                            if in_think:
+                                end_idx = buffer.find("</think>")
+                                if end_idx != -1:
+                                    in_think = False
+                                    buffer = buffer[end_idx + len("</think>") :]
+                                else:
+                                    buffer = ""
+                                    break
+                            else:
+                                start_idx = buffer.find("<think>")
+                                if start_idx != -1:
+                                    if start_idx > 0:
+                                        yield buffer[:start_idx]
+                                        yielded_any = True
+                                    in_think = True
+                                    buffer = buffer[start_idx + len("<think>") :]
+                                else:
+                                    # Suppress initial reasoning preamble if present
+                                    if not yielded_any and self._PREAMBLE_START_RE.match(buffer):
+                                        if "\n\n" in buffer:
+                                            buffer = buffer.split("\n\n", 1)[1]
+                                        else:
+                                            break
 
+                                    yield buffer
+                                    yielded_any = True
+                                    buffer = ""
+
+                    if buffer and not in_think:
+                        yield buffer
                     return
 
                 except Exception as exc:
