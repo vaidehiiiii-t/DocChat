@@ -44,7 +44,7 @@ class LLMService:
         active_settings = self._get_settings()
         if active_settings and not active_settings.ALLOW_PAID_MODELS:
             primary = active_settings.LLM_MODEL
-            if primary and not primary.endswith(":free"):
+            if primary and not (primary.endswith(":free") or primary == "openrouter/free"):
                 raise ValueError(
                     f"Non-free model '{primary}' configured while ALLOW_PAID_MODELS is false."
                 )
@@ -52,7 +52,15 @@ class LLMService:
     def _get_settings(self):
         if self._settings is not None:
             return self._settings
-        return current_app.config.get("DOCCHAT_SETTINGS") if current_app else None
+        if current_app:
+            cfg = current_app.config.get("DOCCHAT_SETTINGS")
+            if cfg:
+                return cfg
+        try:
+            from app.config import Settings
+            return Settings()
+        except Exception:
+            return None
 
     def _get_client(self) -> Any:
         if self._client is not None:
@@ -352,13 +360,19 @@ class LLMService:
 
                     if buffer and not in_think:
                         yield buffer
-                    return
+                        yielded_any = True
+
+                    if yielded_any:
+                        return
+
+                    logger.warning("Stream model %s yielded no content; falling back", model)
+                    break
 
                 except Exception as exc:
                     last_error = exc
                     err_str = str(exc)
-                    if "404" in err_str or "not_found" in err_str.lower():
-                        logger.warning("Stream model %s returned 404; falling back", model)
+                    if "404" in err_str or "not_found" in err_str.lower() or "429" in err_str or "rate" in err_str.lower():
+                        logger.warning("Stream model %s unavailable/rate-limited (%s); falling back immediately", model, err_str[:80])
                         break
 
                     if attempt < max_retries - 1:

@@ -52,9 +52,9 @@ services:
       - key: OPENROUTER_BASE_URL
         value: https://openrouter.ai/api/v1
       - key: LLM_MODEL
-        value: openrouter/free
+        value: poolside/laguna-s-2.1:free
       - key: LLM_FALLBACK_MODELS
-        value: poolside/laguna-s-2.1:free,poolside/laguna-xs-2.1:free,google/gemma-4-31b-it:free,qwen/qwen3.8-27b:free
+        value: nvidia/nemotron-3-super-120b-a12b:free,google/gemma-4-31b-it:free
       - key: LLM_MAX_TOKENS
         value: "1000"
       - key: LLM_TEMPERATURE

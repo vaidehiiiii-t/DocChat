@@ -38,8 +38,8 @@ class Settings(BaseSettings):
 
     OPENROUTER_API_KEY: str = ""
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
-    LLM_MODEL: str = "openrouter/free"
-    LLM_FALLBACK_MODELS: str = "poolside/laguna-s-2.1:free,poolside/laguna-xs-2.1:free,google/gemma-4-31b-it:free,qwen/qwen3.8-27b:free"
+    LLM_MODEL: str = "poolside/laguna-s-2.1:free"
+    LLM_FALLBACK_MODELS: str = "nvidia/nemotron-3-super-120b-a12b:free,google/gemma-4-31b-it:free"
     LLM_MAX_TOKENS: int = 1000
     LLM_TEMPERATURE: float = 0.2
     LLM_TIMEOUT_SECONDS: int = 30
