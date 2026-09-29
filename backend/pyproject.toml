@@ -24,7 +24,7 @@ dependencies = [
     "pytest-cov>=7.1.0",
     "python-dotenv>=1.2.3",
     "requests>=2.34.2",
-    "sentence-transformers>=6.1.0",
+    "fastembed>=0.8.1",
 ]
 
 [dependency-groups]

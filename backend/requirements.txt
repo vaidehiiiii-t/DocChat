@@ -2,7 +2,7 @@
 flask==3.1.3
 flask-cors==6.0.0
 flask-jwt-extended==4.7.1
-flask-limiter==4.0.1
+flask-limiter==4.1.1
 flask-migrate==4.0.7
 flask-sqlalchemy==3.1.1
 gunicorn==23.0.0
@@ -19,8 +19,8 @@ pydantic==2.9.2
 pydantic-settings==2.6.1
 python-dotenv==1.0.1
 
-# ML / embeddings (lazy-loaded, not imported on startup)
-sentence-transformers==3.3.1
+# ML / embeddings (lightweight fastembed - no PyTorch!)
+fastembed==0.8.1
 chromadb==0.5.23
 
 # Document parsing
